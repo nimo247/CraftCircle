@@ -93,21 +93,24 @@ export default function VendorRegister() {
     setUploadError(null);
 
     try {
-      // Basic validation for password fields
-      if (!data.password || !data.confirmPassword) {
-        setUploadError("Please provide and confirm a password.");
-        setSubmitting(false);
-        return;
-      }
-      if (data.password.length < 6) {
-        setUploadError("Password must be at least 6 characters.");
-        setSubmitting(false);
-        return;
-      }
-      if (data.password !== data.confirmPassword) {
-        setUploadError("Passwords do not match.");
-        setSubmitting(false);
-        return;
+      // Passwords are optional at application time — accounts are created only after admin approval.
+      // If user provided password now, validate it; otherwise skip password validation.
+      if (data.password || data.confirmPassword) {
+        if (!data.password || !data.confirmPassword) {
+          setUploadError("Please provide and confirm a password, or leave both blank to set a password after approval.");
+          setSubmitting(false);
+          return;
+        }
+        if (data.password.length < 6) {
+          setUploadError("Password must be at least 6 characters.");
+          setSubmitting(false);
+          return;
+        }
+        if (data.password !== data.confirmPassword) {
+          setUploadError("Passwords do not match.");
+          setSubmitting(false);
+          return;
+        }
       }
 
       if (fileObjects.length === 0) {
@@ -116,42 +119,7 @@ export default function VendorRegister() {
         return;
       }
 
-      // Create a Firebase account (no-auto-sign) for vendor so they can log in later
-      try {
-        const emailToCreate = (data.email || "").trim().toLowerCase();
-        // update local state in case user had whitespace/case differences
-        setData((d) => ({ ...d, email: emailToCreate }));
-
-        // Check existing sign-in methods to avoid EMAIL_EXISTS
-        const methods = await fetchSignInMethodsForEmail(auth, emailToCreate);
-        if (methods && methods.length > 0) {
-          if (methods.includes("password")) {
-            try {
-              await sendPasswordResetEmail(auth, emailToCreate);
-              setUploadError(
-                "An account with this email exists. A password reset email has been sent. Please check your inbox.",
-              );
-            } catch (e) {
-              console.error("Failed to send password reset:", e);
-              setUploadError("An account with this email exists. Please sign in instead.");
-            }
-          } else {
-            setUploadError("An account with this email exists. Sign in method: " + methods.join(", "));
-          }
-          setSubmitting(false);
-          return;
-        }
-
-        const { createUserEmailNoAutoSign } = await import("@/firebase");
-        await createUserEmailNoAutoSign(emailToCreate, data.password);
-      } catch (err: any) {
-        const code = err?.code || String(err?.message || err);
-        console.error("Firebase create account error:", err, "code:", code);
-        // Other errors: stop
-        setUploadError("Failed to create account. " + (err?.message || ""));
-        setSubmitting(false);
-        return;
-      }
+      // Do NOT create Firebase user here. Store the application; admin will create the account and notify the user upon approval.
 
       // Proceed to submit vendor application to server
       const form = new FormData();
