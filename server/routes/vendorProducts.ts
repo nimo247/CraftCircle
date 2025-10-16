@@ -12,15 +12,23 @@ const upload = multer({
 
 const SUPABASE_URL = process.env.SUPABASE_URL || "";
 const SUPABASE_SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE || "";
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || "";
 
 let supabaseAdmin: any = null;
+let supabaseIsServiceRole = false;
 if (SUPABASE_URL && SUPABASE_SERVICE_ROLE) {
   supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE, {
     auth: { persistSession: false },
   });
+  supabaseIsServiceRole = true;
+} else if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+  supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: false },
+  });
+  console.warn("Supabase service role not set; falling back to anon key for public reads (read-only).");
 } else {
   console.warn(
-    "Supabase service role or URL not set. Vendor products route will return 503.",
+    "Supabase URL and keys not set. Vendor products route will return 503.",
   );
 }
 
