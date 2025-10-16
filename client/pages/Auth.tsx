@@ -166,7 +166,7 @@ export default function Auth() {
         }
 
         // Approved vendor — allow login and mark vendor flag
-        localStorage.setItem("isVendor", "true");
+        sessionStorage.setItem("isVendor", "true");
         // notify other parts of the app in this window
         try {
           window.dispatchEvent(new Event("roleChange"));
@@ -194,10 +194,10 @@ export default function Auth() {
 
       if (username === ADMIN_USERNAME && adminKey === ADMIN_KEY) {
         // Mark as admin in local storage and navigate to admin dashboard
-        localStorage.setItem("isAdmin", "true");
+        sessionStorage.setItem("isAdmin", "true");
         // persist the admin key so client can call admin endpoints
         try {
-          localStorage.setItem("adminKey", adminKey);
+          sessionStorage.setItem("adminKey", adminKey);
         } catch (_) {}
         // notify other parts of the app in this window
         try {
