@@ -124,6 +124,7 @@ router.delete("/reviews/:id", async (req, res) => {
 
 // POST /api/admin/reviews/delete - bulk delete reviews by id (admin only)
 router.post("/reviews/delete", async (req, res) => {
+  if (!supabaseAdmin) return res.status(503).json({ message: "Supabase not configured" });
   try {
     const ids = (req.body && req.body.ids) || [];
     if (!Array.isArray(ids) || ids.length === 0) return res.status(400).json({ message: "ids array required" });
