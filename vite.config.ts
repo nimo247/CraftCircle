@@ -15,6 +15,19 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     outDir: "dist/spa",
+    chunkSizeWarningLimit: 700,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id) return undefined;
+          if (id.includes('node_modules')) {
+            if (id.includes('firebase')) return 'firebase-vendor';
+            if (id.includes('@supabase')) return 'supabase-vendor';
+            return 'vendor';
+          }
+        },
+      },
+    },
   },
   plugins: [react(), expressPlugin()],
   resolve: {
