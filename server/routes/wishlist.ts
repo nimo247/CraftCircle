@@ -5,14 +5,21 @@ const router = express.Router();
 
 const SUPABASE_URL = process.env.SUPABASE_URL || "";
 const SUPABASE_SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE || "";
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || "";
 let supabaseAdmin: any = null;
+let supabaseIsServiceRole = false;
 if (SUPABASE_URL && SUPABASE_SERVICE_ROLE) {
   supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE, {
     auth: { persistSession: false },
   });
+  supabaseIsServiceRole = true;
+} else if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+  // do not enable wishlist writes without service role
+  supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: false } });
+  console.warn("Supabase service role not set; wishlist write operations will be blocked.");
 } else {
   console.warn(
-    "Supabase service role or URL not set. Wishlist routes will return 503.",
+    "Supabase URL and keys not set. Wishlist routes will return 503.",
   );
 }
 
