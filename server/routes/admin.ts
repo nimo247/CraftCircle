@@ -6,13 +6,14 @@ const router = express.Router();
 const SUPABASE_URL = process.env.SUPABASE_URL || "";
 const SUPABASE_SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE || "";
 
-if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE) {
-  console.warn("Supabase service role or URL not set. Admin vendor list route will fail if used.");
+let supabaseAdmin: any = null;
+if (SUPABASE_URL && SUPABASE_SERVICE_ROLE) {
+  supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE, {
+    auth: { persistSession: false },
+  });
+} else {
+  console.warn("Supabase service role or URL not set. Admin routes will return 503.");
 }
-
-const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE, {
-  auth: { persistSession: false },
-});
 
 // GET /api/admin/vendors - returns list of vendors (admin use)
 router.get("/vendors", async (req, res) => {
