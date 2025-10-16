@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 
 type Vendor = {
-  id: number;
+  id: string;
   business_name?: string;
   contact_email?: string;
   primary_category?: string;
