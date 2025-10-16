@@ -169,6 +169,7 @@ router.post("/vendors/:id/approve", async (req, res) => {
 
 // POST /api/admin/vendors/:id/reject - set vendor status to rejected
 router.post("/vendors/:id/reject", async (req, res) => {
+  if (!supabaseAdmin) return res.status(503).json({ message: "Supabase not configured" });
   try {
     const id = req.params.id;
     console.log("ADMIN POST reject called", { id, headers: req.headers, query: req.query });
