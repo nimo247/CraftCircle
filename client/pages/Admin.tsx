@@ -193,8 +193,8 @@ export default function Admin() {
                                 size="sm"
                                 onClick={async () => {
                                   try {
-                                    const res = await fetch(`/api/admin/vendors/${v.id}?status=approved`, {
-                                        method: "PATCH",
+                                    const res = await fetch(`/api/admin/vendors/${v.id}/approve`, {
+                                        method: "POST",
                                         headers: {
                                           "Content-Type": "application/json",
                                         },
@@ -224,8 +224,8 @@ export default function Admin() {
                                 variant="destructive"
                                 onClick={async () => {
                                   try {
-                                    const res = await fetch(`/api/admin/vendors/${v.id}?status=rejected`, {
-                                        method: "PATCH",
+                                    const res = await fetch(`/api/admin/vendors/${v.id}/reject`, {
+                                        method: "POST",
                                         headers: {
                                           "Content-Type": "application/json",
                                         },
