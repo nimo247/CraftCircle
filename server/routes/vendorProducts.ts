@@ -69,8 +69,8 @@ router.post(
   "/products/upload-image",
   upload.array("images"),
   async (req: any, res) => {
-    if (!supabaseAdmin)
-      return res.status(503).json({ message: "Supabase not configured" });
+    if (!supabaseAdmin) return res.status(503).json({ message: "Supabase not configured" });
+    if (!supabaseIsServiceRole) return res.status(403).json({ message: "Image uploads require Supabase service role" });
     try {
       const files = req.files as Express.Multer.File[] | undefined;
       const vendor_email = req.body.vendor_email as string | undefined;
