@@ -17,6 +17,7 @@ if (SUPABASE_URL && SUPABASE_SERVICE_ROLE) {
 
 // GET /api/admin/vendors - returns list of vendors (admin use)
 router.get("/vendors", async (req, res) => {
+  if (!supabaseAdmin) return res.status(503).json({ message: "Supabase not configured" });
   try {
     const email = req.query.email as string | undefined;
     let query = supabaseAdmin.from("vendors").select("*").order("id", { ascending: false }).limit(200);
