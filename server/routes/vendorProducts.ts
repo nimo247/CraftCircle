@@ -23,6 +23,7 @@ if (SUPABASE_URL && SUPABASE_SERVICE_ROLE) {
 
 // GET /api/vendor/products?email=vendor@example.com
 router.get("/products", async (req, res) => {
+  if (!supabaseAdmin) return res.status(503).json({ message: "Supabase not configured" });
   try {
     const email = req.query.email as string | undefined;
     let query = supabaseAdmin
