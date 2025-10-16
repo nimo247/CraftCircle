@@ -56,6 +56,12 @@ router.post("/vendors/verify", async (req, res) => {
 router.patch("/vendors/:id", async (req, res) => {
   try {
     const id = req.params.id;
+    console.log("ADMIN PATCH /vendors/:id called", { id, method: req.method });
+    console.log("Headers:", req.headers);
+    console.log("Query:", req.query);
+    console.log("Raw body type:", typeof req.body);
+    console.log("Body (truncated):", JSON.stringify(req.body).slice(0, 2000));
+
     // Support status from multiple sources and handle stringified bodies (some proxies send raw JSON strings)
     let status: any = undefined;
     // If body is a raw JSON string, try parsing
@@ -70,7 +76,10 @@ router.patch("/vendors/:id", async (req, res) => {
     // Then check common places
     status = status || (req.body && (req.body.status as any)) || (req.query && (req.query.status as any)) || (req.headers["x-status"] as any);
     if (typeof status === "string") status = status.trim();
-    if (!status) return res.status(400).json({ message: "status is required" });
+    if (!status) {
+      console.warn("Missing status on request", { id });
+      return res.status(400).json({ message: "status is required", debug: { headers: req.headers, query: req.query, body: req.body } });
+    }
     const { data, error } = await supabaseAdmin.from("vendors").update({ status }).eq("id", id).select();
     if (error) {
       console.error("Supabase update error:", error);
@@ -137,6 +146,7 @@ router.post("/reviews/delete", async (req, res) => {
 router.post("/vendors/:id/approve", async (req, res) => {
   try {
     const id = req.params.id;
+    console.log("ADMIN POST approve called", { id, headers: req.headers, query: req.query });
     if (!id) return res.status(400).json({ message: "id is required" });
     const { data, error } = await supabaseAdmin.from("vendors").update({ status: "approved" }).eq("id", id).select();
     if (error) {
@@ -154,6 +164,7 @@ router.post("/vendors/:id/approve", async (req, res) => {
 router.post("/vendors/:id/reject", async (req, res) => {
   try {
     const id = req.params.id;
+    console.log("ADMIN POST reject called", { id, headers: req.headers, query: req.query });
     if (!id) return res.status(400).json({ message: "id is required" });
     const { data, error } = await supabaseAdmin.from("vendors").update({ status: "rejected" }).eq("id", id).select();
     if (error) {
