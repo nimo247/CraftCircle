@@ -1,5 +1,7 @@
 import express from "express";
 import { createClient } from "@supabase/supabase-js";
+import fs from "fs";
+import path from "path";
 
 const router = express.Router();
 
@@ -26,10 +28,23 @@ if (SUPABASE_URL && SUPABASE_SERVICE_ROLE) {
   console.warn("Supabase URL and keys not set. Admin routes will return 503.");
 }
 
+let localVendors: any = null;
+try {
+  localVendors = require("../localVendors").default;
+} catch (err) {
+  console.warn("Local vendors helper not available", err);
+}
+
 // GET /api/admin/vendors - returns list of vendors (admin use)
 router.get("/vendors", async (req, res) => {
-  if (!supabaseAdmin)
+  if (!supabaseAdmin) {
+    if (process.env.NODE_ENV !== "production" && localVendors) {
+      const email = req.query.email as string | undefined;
+      const data = await localVendors.getVendors(email);
+      return res.json({ vendors: data });
+    }
     return res.status(503).json({ message: "Supabase not configured" });
+  }
   if (!supabaseIsServiceRole)
     return res
       .status(403)
@@ -64,8 +79,15 @@ router.get("/vendors", async (req, res) => {
 
 // POST /api/admin/vendors/verify - check vendor status by email
 router.post("/vendors/verify", async (req, res) => {
-  if (!supabaseAdmin)
+  if (!supabaseAdmin) {
+    if (process.env.NODE_ENV !== "production" && localVendors) {
+      const { email } = req.body as { email?: string };
+      if (!email) return res.status(400).json({ message: "email is required" });
+      const vendor = await localVendors.getVendorByEmail(email);
+      return res.json({ vendor });
+    }
     return res.status(503).json({ message: "Supabase not configured" });
+  }
   if (!supabaseIsServiceRole)
     return res
       .status(403)
@@ -94,8 +116,34 @@ router.post("/vendors/verify", async (req, res) => {
 
 // PATCH /api/admin/vendors/:id - update vendor status
 router.patch("/vendors/:id", async (req, res) => {
-  if (!supabaseAdmin)
+  if (!supabaseAdmin) {
+    if (process.env.NODE_ENV !== "production" && localVendors) {
+      try {
+        const id = req.params.id;
+        let status: any = undefined;
+        if (typeof req.body === "string") {
+          try {
+            const parsed = JSON.parse(req.body);
+            status = parsed?.status;
+          } catch (e) {}
+        }
+        status =
+          status ||
+          (req.body && (req.body.status as any)) ||
+          (req.query && (req.query.status as any)) ||
+          (req.headers["x-status"] as any);
+        if (typeof status === "string") status = status.trim();
+        if (!status) return res.status(400).json({ message: "status is required" });
+        const updated = await localVendors.updateVendorById(id, { status });
+        if (!updated) return res.status(404).json({ message: "vendor not found" });
+        return res.json({ vendor: updated });
+      } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Unexpected server error" });
+      }
+    }
     return res.status(503).json({ message: "Supabase not configured" });
+  }
   if (!supabaseIsServiceRole)
     return res
       .status(403)
