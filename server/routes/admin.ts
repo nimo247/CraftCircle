@@ -56,9 +56,20 @@ router.post("/vendors/verify", async (req, res) => {
 router.patch("/vendors/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    // Support status in JSON body, query param, or x-status header to be robust against proxies
-    let status = (req.body && (req.body.status as string)) || (req.query && (req.query.status as string)) || (req.headers['x-status'] as string);
-    if (typeof status === 'string') status = status.trim();
+    // Support status from multiple sources and handle stringified bodies (some proxies send raw JSON strings)
+    let status: any = undefined;
+    // If body is a raw JSON string, try parsing
+    if (typeof req.body === "string") {
+      try {
+        const parsed = JSON.parse(req.body);
+        status = parsed?.status;
+      } catch (e) {
+        // ignore parse error
+      }
+    }
+    // Then check common places
+    status = status || (req.body && (req.body.status as any)) || (req.query && (req.query.status as any)) || (req.headers["x-status"] as any);
+    if (typeof status === "string") status = status.trim();
     if (!status) return res.status(400).json({ message: "status is required" });
     const { data, error } = await supabaseAdmin.from("vendors").update({ status }).eq("id", id).select();
     if (error) {
