@@ -57,6 +57,7 @@ router.post("/vendors/verify", async (req, res) => {
 
 // PATCH /api/admin/vendors/:id - update vendor status
 router.patch("/vendors/:id", async (req, res) => {
+  if (!supabaseAdmin) return res.status(503).json({ message: "Supabase not configured" });
   try {
     const id = req.params.id;
     console.log("ADMIN PATCH /vendors/:id called", { id, method: req.method });
