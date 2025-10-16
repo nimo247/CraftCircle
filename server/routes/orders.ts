@@ -69,6 +69,7 @@ router.post("/", async (req, res) => {
 
 // DELETE /api/orders - body: { user_id, order_id?, product_id? }
 router.delete("/", async (req, res) => {
+  if (!supabaseAdmin) return res.status(503).json({ message: "Supabase not configured" });
   try {
     const { user_id, order_id, product_id } = req.body || {};
     if (!user_id) return res.status(400).json({ error: "user_id required" });
