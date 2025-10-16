@@ -98,6 +98,7 @@ router.patch("/vendors/:id", async (req, res) => {
 
 // DELETE /api/admin/reviews/:id - delete review by id (admin only)
 router.delete("/reviews/:id", async (req, res) => {
+  if (!supabaseAdmin) return res.status(503).json({ message: "Supabase not configured" });
   try {
     const id = req.params.id;
     if (!id) return res.status(400).json({ message: "id is required" });
