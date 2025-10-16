@@ -212,8 +212,19 @@ export default function Marketplace({ limit }: { limit?: number }) {
       if (pageParam) qs.set("page", String(pageParam));
       const url = `/api/products?${qs.toString()}`;
       const res = await fetch(url);
-      if (!res.ok) throw new Error("Failed to load products");
-      const json = await res.json();
+      if (!res.ok) {
+        const txt = await res.text().catch(() => null);
+        console.error("Failed to load products:", txt);
+        throw new Error("Failed to load products");
+      }
+      let json: any;
+      try {
+        json = await res.json();
+      } catch (e) {
+        const txt = await res.text().catch(() => null);
+        console.error("Invalid JSON from /api/products:", txt);
+        throw new Error("Invalid JSON response from server");
+      }
       setProducts(json.products || []);
       setTotal(typeof json.total === "number" ? json.total : null);
     } catch (error) {
