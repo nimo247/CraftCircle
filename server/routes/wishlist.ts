@@ -72,8 +72,8 @@ router.post("/", async (req, res) => {
 
 // DELETE /api/wishlist { user_id, product_id }
 router.delete("/", async (req, res) => {
-  if (!supabaseAdmin)
-    return res.status(503).json({ message: "Supabase not configured" });
+  if (!supabaseAdmin) return res.status(503).json({ message: "Supabase not configured" });
+  if (!supabaseIsServiceRole) return res.status(403).json({ message: "Wishlist writes require Supabase service role" });
   try {
     const { user_id, product_id } = req.body || {};
     console.debug("DELETE /api/wishlist body:", req.body);
