@@ -193,18 +193,12 @@ export default function Admin() {
                                 size="sm"
                                 onClick={async () => {
                                   try {
-                                    const res = await fetch(
-                                      `/api/admin/vendors/${v.id}`,
-                                      {
+                                    const res = await fetch(`/api/admin/vendors/${v.id}?status=approved`, {
                                         method: "PATCH",
                                         headers: {
                                           "Content-Type": "application/json",
                                         },
-                                        body: JSON.stringify({
-                                          status: "approved",
-                                        }),
-                                      },
-                                    );
+                                      });
                                     if (!res.ok)
                                       throw new Error("Failed to approve");
                                     const data = await res.json();
@@ -230,18 +224,12 @@ export default function Admin() {
                                 variant="destructive"
                                 onClick={async () => {
                                   try {
-                                    const res = await fetch(
-                                      `/api/admin/vendors/${v.id}`,
-                                      {
+                                    const res = await fetch(`/api/admin/vendors/${v.id}?status=rejected`, {
                                         method: "PATCH",
                                         headers: {
                                           "Content-Type": "application/json",
                                         },
-                                        body: JSON.stringify({
-                                          status: "rejected",
-                                        }),
-                                      },
-                                    );
+                                      });
                                     if (!res.ok)
                                       throw new Error("Failed to reject");
                                     const data = await res.json();
