@@ -16,6 +16,7 @@ if (SUPABASE_URL && SUPABASE_SERVICE_ROLE) {
 
 // GET /api/orders?user_id=...
 router.get("/", async (req, res) => {
+  if (!supabaseAdmin) return res.status(503).json({ message: "Supabase not configured" });
   try {
     const user_id = String(req.query.user_id || "").trim();
     if (!user_id) return res.status(400).json({ error: "user_id required" });
