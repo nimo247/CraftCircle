@@ -3,6 +3,8 @@ import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
 
+import path from "path";
+
 export function createServer() {
   const app = express();
 
@@ -12,6 +14,14 @@ export function createServer() {
   const bodyLimit = process.env.BODY_LIMIT || "10mb";
   app.use(express.json({ limit: bodyLimit }));
   app.use(express.urlencoded({ extended: true, limit: bodyLimit }));
+
+  // Serve uploaded vendor documents locally in development
+  try {
+    const vendorDocsDir = path.join(process.cwd(), "public", "vendor-docs");
+    app.use("/vendor-docs", express.static(vendorDocsDir));
+  } catch (err) {
+    console.warn("Could not set up static vendor-docs serving:", err);
+  }
 
   // Example API routes
   app.get("/api/ping", (_req, res) => {
