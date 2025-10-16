@@ -10,27 +10,43 @@ console.log(
 // If a URL is provided that returns the service account JSON, fetch it at runtime
 // This allows keeping only a short URL in environment variables (avoids Lambda 4KB limit)
 if (process.env.SERVICE_ACCOUNT_SECRET_URL) {
-  try {
-    console.log("Fetching service account from SERVICE_ACCOUNT_SECRET_URL");
-    const res = await fetch(process.env.SERVICE_ACCOUNT_SECRET_URL);
-    if (res.ok) {
-      const text = await res.text();
+  console.log("Attempting background fetch of SERVICE_ACCOUNT_SECRET_URL");
+  // Do not use top-level await — fetch in background and apply when ready.
+  fetch(process.env.SERVICE_ACCOUNT_SECRET_URL as string)
+    .then((res) => {
+      if (!res.ok) {
+        console.error(
+          "Failed to fetch SERVICE_ACCOUNT_SECRET_URL, status:",
+          res.status,
+          res.statusText,
+        );
+        return null;
+      }
+      return res.text();
+    })
+    .then((text) => {
+      if (!text) return;
       try {
         serviceAccount = JSON.parse(text);
         console.log("SERVER: parsed SERVICE_ACCOUNT_SECRET_URL successfully");
+        // If admin not initialized yet and a serviceAccount is now available, initialize
+        if (!admin.apps.length && serviceAccount) {
+          try {
+            admin.initializeApp({
+              credential: admin.credential.cert(serviceAccount as any),
+            });
+            console.log("SERVER: firebase-admin initialized after secret fetch");
+          } catch (err) {
+            console.error("Failed to initialize firebase-admin after fetch:", err);
+          }
+        }
       } catch (err) {
         console.error("Failed to parse JSON from SERVICE_ACCOUNT_SECRET_URL response:", err);
       }
-    } else {
-      console.error(
-        "Failed to fetch SERVICE_ACCOUNT_SECRET_URL, status:",
-        res.status,
-        res.statusText,
-      );
-    }
-  } catch (err) {
-    console.error("Error fetching SERVICE_ACCOUNT_SECRET_URL:", err);
-  }
+    })
+    .catch((err) => {
+      console.error("Error fetching SERVICE_ACCOUNT_SECRET_URL:", err);
+    });
 }
 
 // Support base64-encoded service account JSON for safer env transport
