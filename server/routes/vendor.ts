@@ -130,10 +130,6 @@ router.post("/apply", upload.single("document"), async (req, res) => {
   }
 
   try {
-    const fs = require("fs");
-    const path = require("path");
-    const localVendors = require("../localVendors").default;
-
     const dir = path.join(process.cwd(), "public", "vendor-docs");
     fs.mkdirSync(dir, { recursive: true });
     const filename = `${Date.now()}_${file.originalname}`;
