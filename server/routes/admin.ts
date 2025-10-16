@@ -276,8 +276,21 @@ router.post("/reviews/delete", async (req, res) => {
 
 // POST /api/admin/vendors/:id/approve - set vendor status to approved
 router.post("/vendors/:id/approve", async (req, res) => {
-  if (!supabaseAdmin)
+  if (!supabaseAdmin) {
+    if (process.env.NODE_ENV !== "production" && localVendors) {
+      try {
+        const id = req.params.id;
+        if (!id) return res.status(400).json({ message: "id is required" });
+        const updated = await localVendors.updateVendorById(id, { status: "approved" });
+        if (!updated) return res.status(404).json({ message: "vendor not found" });
+        return res.json({ vendor: updated });
+      } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Unexpected server error" });
+      }
+    }
     return res.status(503).json({ message: "Supabase not configured" });
+  }
   if (!supabaseIsServiceRole)
     return res
       .status(403)
@@ -310,8 +323,21 @@ router.post("/vendors/:id/approve", async (req, res) => {
 
 // POST /api/admin/vendors/:id/reject - set vendor status to rejected
 router.post("/vendors/:id/reject", async (req, res) => {
-  if (!supabaseAdmin)
+  if (!supabaseAdmin) {
+    if (process.env.NODE_ENV !== "production" && localVendors) {
+      try {
+        const id = req.params.id;
+        if (!id) return res.status(400).json({ message: "id is required" });
+        const updated = await localVendors.updateVendorById(id, { status: "rejected" });
+        if (!updated) return res.status(404).json({ message: "vendor not found" });
+        return res.json({ vendor: updated });
+      } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Unexpected server error" });
+      }
+    }
     return res.status(503).json({ message: "Supabase not configured" });
+  }
   if (!supabaseIsServiceRole)
     return res
       .status(403)
