@@ -17,6 +17,7 @@ if (SUPABASE_URL && SUPABASE_SERVICE_ROLE) {
 
 // GET /api/reviews - return public reviews
 router.get("/", async (_req, res) => {
+  if (!supabaseAdmin) return res.status(503).json({ message: "Supabase not configured" });
   try {
     const { data, error } = await supabaseAdmin
       .from("reviews")
