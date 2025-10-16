@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth, signOutClient } from "@/firebase";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, fetchSignInMethodsForEmail, sendPasswordResetEmail } from "firebase/auth";
 import {
   Card,
   CardContent,
@@ -118,25 +118,35 @@ export default function VendorRegister() {
 
       // Create a Firebase account (no-auto-sign) for vendor so they can log in later
       try {
-        const { createUserEmailNoAutoSign } = await import("@/firebase");
         const emailToCreate = (data.email || "").trim().toLowerCase();
         // update local state in case user had whitespace/case differences
         setData((d) => ({ ...d, email: emailToCreate }));
-        await createUserEmailNoAutoSign(emailToCreate, data.password);
-      } catch (err: any) {
-        // If account already exists, ask the user to sign in instead
-        const code = err?.code || String(err?.message || err);
-        console.error("Firebase create account error:", err, "code:", code);
-        if (
-          String(code).includes("email-already-in-use") ||
-          String(code).includes("already")
-        ) {
-          setUploadError(
-            "An account with this email already exists. Please sign in instead.",
-          );
+
+        // Check existing sign-in methods to avoid EMAIL_EXISTS
+        const methods = await fetchSignInMethodsForEmail(auth, emailToCreate);
+        if (methods && methods.length > 0) {
+          if (methods.includes("password")) {
+            try {
+              await sendPasswordResetEmail(auth, emailToCreate);
+              setUploadError(
+                "An account with this email exists. A password reset email has been sent. Please check your inbox.",
+              );
+            } catch (e) {
+              console.error("Failed to send password reset:", e);
+              setUploadError("An account with this email exists. Please sign in instead.");
+            }
+          } else {
+            setUploadError("An account with this email exists. Sign in method: " + methods.join(", "));
+          }
           setSubmitting(false);
           return;
         }
+
+        const { createUserEmailNoAutoSign } = await import("@/firebase");
+        await createUserEmailNoAutoSign(emailToCreate, data.password);
+      } catch (err: any) {
+        const code = err?.code || String(err?.message || err);
+        console.error("Firebase create account error:", err, "code:", code);
         // Other errors: stop
         setUploadError("Failed to create account. " + (err?.message || ""));
         setSubmitting(false);
