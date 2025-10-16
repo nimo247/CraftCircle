@@ -1,4 +1,5 @@
-import { useMemo, useState, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { auth, signOutClient } from "@/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import {
@@ -69,6 +70,7 @@ export default function VendorRegister() {
   });
   const [fileObjects, setFileObjects] = useState<File[]>([]);
   const [currentUser, setCurrentUser] = useState<any | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => setCurrentUser(u));
@@ -117,11 +119,14 @@ export default function VendorRegister() {
       // Create a Firebase account (no-auto-sign) for vendor so they can log in later
       try {
         const { createUserEmailNoAutoSign } = await import("@/firebase");
-        await createUserEmailNoAutoSign(data.email, data.password);
+        const emailToCreate = (data.email || "").trim().toLowerCase();
+        // update local state in case user had whitespace/case differences
+        setData((d) => ({ ...d, email: emailToCreate }));
+        await createUserEmailNoAutoSign(emailToCreate, data.password);
       } catch (err: any) {
         // If account already exists, ask the user to sign in instead
         const code = err?.code || String(err?.message || err);
-        console.error("Firebase create account error:", err);
+        console.error("Firebase create account error:", err, "code:", code);
         if (
           String(code).includes("email-already-in-use") ||
           String(code).includes("already")
