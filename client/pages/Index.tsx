@@ -24,8 +24,19 @@ export default function Index() {
       setLoading(true);
       try {
         const res = await fetch("/api/products?limit=12");
-        if (!res.ok) throw new Error("Failed to load products");
-        const json = await res.json();
+        if (!res.ok) {
+          const txt = await res.text().catch(() => null);
+          console.error("Failed to load products:", txt);
+          throw new Error("Failed to load products");
+        }
+        let json: any;
+        try {
+          json = await res.json();
+        } catch (e) {
+          const txt = await res.text().catch(() => null);
+          console.error("Invalid JSON from /api/products:", txt);
+          throw new Error("Invalid JSON response from server");
+        }
         setProducts(json.products || []);
       } catch (err) {
         console.error(err);
