@@ -6,9 +6,14 @@ const router = express.Router();
 const SUPABASE_URL = process.env.SUPABASE_URL || "";
 const SUPABASE_SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE || "";
 
-const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE, {
-  auth: { persistSession: false },
-});
+let supabaseAdmin: any = null;
+if (SUPABASE_URL && SUPABASE_SERVICE_ROLE) {
+  supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE, {
+    auth: { persistSession: false },
+  });
+} else {
+  console.warn("Supabase service role or URL not set. Products route will return 503.");
+}
 
 // GET /api/products - public listing of active products, search, filtering and pagination
 router.get("/products", async (req, res) => {
