@@ -60,7 +60,14 @@ export default function ReviewsPage() {
               const q = `?ids=${encodeURIComponent(ids.join(","))}`;
               const pres = await fetch(`/api/products${q}`);
               if (pres.ok) {
-                const pjson = await pres.json();
+                let pjson: any;
+                try {
+                  pjson = await pres.json();
+                } catch (e) {
+                  const txt = await pres.text().catch(() => null);
+                  console.error("Invalid JSON from /api/products:", txt);
+                  throw new Error("Invalid JSON response from server");
+                }
                 const products = pjson.products || [];
                 const byId: Record<string, any> = {};
                 for (const p of products) byId[String(p.id)] = p;
