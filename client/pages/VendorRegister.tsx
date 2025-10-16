@@ -550,9 +550,11 @@ export default function VendorRegister() {
                 onClick={async () => {
                   try {
                     await signOutClient();
-                    localStorage.removeItem("isVendor");
+                    sessionStorage.removeItem("isVendor");
                     try {
+                      try {
                       window.dispatchEvent(new Event("roleChange"));
+                    } catch (_) {}
                     } catch (_) {}
                   } catch (err) {
                     console.error("Sign out failed", err);

@@ -17,7 +17,7 @@ type Vendor = {
 export default function Admin() {
   const navigate = useNavigate();
   const isAdmin =
-    typeof window !== "undefined" && localStorage.getItem("isAdmin") === "true";
+    typeof window !== "undefined" && sessionStorage.getItem("isAdmin") === "true";
 
   const [vendors, setVendors] = useState<Vendor[] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -76,7 +76,7 @@ export default function Admin() {
           <Button
             variant="ghost"
             onClick={() => {
-              localStorage.removeItem("isAdmin");
+              sessionStorage.removeItem("isAdmin");
               try {
                 window.dispatchEvent(new Event("roleChange"));
               } catch (_) {}

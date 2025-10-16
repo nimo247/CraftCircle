@@ -61,38 +61,27 @@ export default function Header() {
   const [user, setUser] = useState<any | null>(null);
   // derive isAdmin and isVendor from localStorage and keep them in state so header updates when flags change
   const [isAdmin, setIsAdmin] = useState(
-    typeof window !== "undefined" && localStorage.getItem("isAdmin") === "true",
+    typeof window !== "undefined" && sessionStorage.getItem("isAdmin") === "true",
   );
   const [isVendor, setIsVendor] = useState(
     typeof window !== "undefined" &&
-      localStorage.getItem("isVendor") === "true",
+      sessionStorage.getItem("isVendor") === "true",
   );
 
   useEffect(() => {
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === "isAdmin") {
-        setIsAdmin(e.newValue === "true");
-      }
-      if (e.key === "isVendor") {
-        setIsVendor(e.newValue === "true");
-      }
-    };
-
     const onRoleChange = () => {
       setIsAdmin(
         typeof window !== "undefined" &&
-          localStorage.getItem("isAdmin") === "true",
+          sessionStorage.getItem("isAdmin") === "true",
       );
       setIsVendor(
         typeof window !== "undefined" &&
-          localStorage.getItem("isVendor") === "true",
+          sessionStorage.getItem("isVendor") === "true",
       );
     };
 
-    window.addEventListener("storage", onStorage);
     window.addEventListener("roleChange", onRoleChange as EventListener);
     return () => {
-      window.removeEventListener("storage", onStorage);
       window.removeEventListener("roleChange", onRoleChange as EventListener);
     };
   }, []);
@@ -277,8 +266,8 @@ export default function Header() {
                         onClick={async () => {
                           try {
                             await signOutClient();
-                            localStorage.removeItem("isVendor");
-                            localStorage.removeItem("isAdmin");
+                            sessionStorage.removeItem("isVendor");
+                            sessionStorage.removeItem("isAdmin");
                             // update local role state so header updates in this window
                             setIsVendor(false);
                             setIsAdmin(false);
@@ -347,7 +336,7 @@ export default function Header() {
                   <BarChart2 className="size-4" /> Impact Analytics
                 </RouterLink>
                 {typeof window !== "undefined" &&
-                  localStorage.getItem("isAdmin") === "true" && (
+                  sessionStorage.getItem("isAdmin") === "true" && (
                     <RouterLink
                       to="/admin"
                       className="text-sm font-medium inline-flex items-center gap-2"
