@@ -10,15 +10,16 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: max
 const SUPABASE_URL = process.env.SUPABASE_URL || "";
 const SUPABASE_SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE || "";
 
-if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE) {
+let supabaseAdmin: any = null;
+if (SUPABASE_URL && SUPABASE_SERVICE_ROLE) {
+  supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE, {
+    auth: { persistSession: false },
+  });
+} else {
   console.warn(
-    "Supabase service role or URL not set. Vendor products route will fail if used.",
+    "Supabase service role or URL not set. Vendor products route will return 503.",
   );
 }
-
-const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE, {
-  auth: { persistSession: false },
-});
 
 // GET /api/vendor/products?email=vendor@example.com
 router.get("/products", async (req, res) => {
