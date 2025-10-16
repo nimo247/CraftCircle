@@ -1,1 +1,16 @@
-[]
+[
+  {
+    "id": 1760635001685,
+    "business_name": "Ecocomer",
+    "contact_email": "assas@gmail.com",
+    "primary_category": "Fashion & Accessories",
+    "location": "india",
+    "your_story": "hii",
+    "sustainability_practices": [
+      "Recyclable packaging",
+      "Carbon-neutral shipping"
+    ],
+    "verification_document_url": "http://localhost:8080/vendor-docs/1760635001684_ECECC303_EIECC303_2024 (1).pdf",
+    "status": "pending"
+  }
+]
