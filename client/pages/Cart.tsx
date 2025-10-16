@@ -63,8 +63,19 @@ function CartProducts({
       try {
         const q = ids.length ? `?ids=${ids.join(",")}` : "";
         const res = await fetch(`/api/products${q}`);
-        if (!res.ok) throw new Error("Failed to load cart products");
-        const json = await res.json();
+        if (!res.ok) {
+          const txt = await res.text().catch(() => null);
+          console.error("Failed to load cart products:", txt);
+          throw new Error("Failed to load cart products");
+        }
+        let json: any;
+        try {
+          json = await res.json();
+        } catch (e) {
+          const txt = await res.text().catch(() => null);
+          console.error("Invalid JSON from /api/products:", txt);
+          throw new Error("Invalid JSON response from server");
+        }
         // preserve order matching ids
         const byId: Record<string, any> = {};
         (json.products || []).forEach((p: any) => (byId[String(p.id)] = p));
