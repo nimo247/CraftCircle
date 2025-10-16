@@ -38,6 +38,7 @@ router.get("/vendors", async (req, res) => {
 
 // POST /api/admin/vendors/verify - check vendor status by email
 router.post("/vendors/verify", async (req, res) => {
+  if (!supabaseAdmin) return res.status(503).json({ message: "Supabase not configured" });
   try {
     const { email } = req.body as { email?: string };
     if (!email) return res.status(400).json({ message: "email is required" });
