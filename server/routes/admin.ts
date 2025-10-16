@@ -150,6 +150,7 @@ router.post("/reviews/delete", async (req, res) => {
 
 // POST /api/admin/vendors/:id/approve - set vendor status to approved
 router.post("/vendors/:id/approve", async (req, res) => {
+  if (!supabaseAdmin) return res.status(503).json({ message: "Supabase not configured" });
   try {
     const id = req.params.id;
     console.log("ADMIN POST approve called", { id, headers: req.headers, query: req.query });
