@@ -8,13 +8,14 @@ const upload = multer({ storage: multer.memoryStorage() });
 const SUPABASE_URL = process.env.SUPABASE_URL || "";
 const SUPABASE_SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE || "";
 
-if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE) {
-  console.warn("Supabase service role or URL not set. Vendor upload route will fail if used.");
+let supabaseAdmin: any = null;
+if (SUPABASE_URL && SUPABASE_SERVICE_ROLE) {
+  supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE, {
+    auth: { persistSession: false },
+  });
+} else {
+  console.warn("Supabase service role or URL not set. Vendor upload route will return 503.");
 }
-
-const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE, {
-  auth: { persistSession: false },
-});
 
 // POST /api/vendor/apply
 // Expects multipart/form-data with fields: business_name, contact_email, primary_category, location, your_story, sustainability_practices (JSON array or comma separated), and file field 'document'
