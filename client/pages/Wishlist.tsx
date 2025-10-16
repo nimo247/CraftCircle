@@ -74,8 +74,19 @@ function WishlistProducts({ ids }: { ids: string[] }) {
       try {
         const q = ids.length ? `?ids=${ids.join(",")}` : "";
         const res = await fetch(`/api/products${q}`);
-        if (!res.ok) throw new Error("Failed to load wishlist products");
-        const json = await res.json();
+        if (!res.ok) {
+          const txt = await res.text().catch(() => null);
+          console.error("Failed to load wishlist products:", txt);
+          throw new Error("Failed to load wishlist products");
+        }
+        let json: any;
+        try {
+          json = await res.json();
+        } catch (e) {
+          const txt = await res.text().catch(() => null);
+          console.error("Invalid JSON from /api/products:", txt);
+          throw new Error("Invalid JSON response from server");
+        }
         setProducts(json.products || []);
       } catch (err) {
         console.error(err);
