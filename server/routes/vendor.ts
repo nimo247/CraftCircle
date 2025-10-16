@@ -1,6 +1,9 @@
 import express from "express";
 import multer from "multer";
 import { createClient } from "@supabase/supabase-js";
+import fs from "fs";
+import path from "path";
+import localVendors from "../localVendors";
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
