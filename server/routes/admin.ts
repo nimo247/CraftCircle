@@ -133,9 +133,11 @@ router.patch("/vendors/:id", async (req, res) => {
           (req.query && (req.query.status as any)) ||
           (req.headers["x-status"] as any);
         if (typeof status === "string") status = status.trim();
-        if (!status) return res.status(400).json({ message: "status is required" });
+        if (!status)
+          return res.status(400).json({ message: "status is required" });
         const updated = await localVendors.updateVendorById(id, { status });
-        if (!updated) return res.status(404).json({ message: "vendor not found" });
+        if (!updated)
+          return res.status(404).json({ message: "vendor not found" });
         return res.json({ vendor: updated });
       } catch (err) {
         console.error(err);
@@ -281,8 +283,11 @@ router.post("/vendors/:id/approve", async (req, res) => {
       try {
         const id = req.params.id;
         if (!id) return res.status(400).json({ message: "id is required" });
-        const updated = await localVendors.updateVendorById(id, { status: "approved" });
-        if (!updated) return res.status(404).json({ message: "vendor not found" });
+        const updated = await localVendors.updateVendorById(id, {
+          status: "approved",
+        });
+        if (!updated)
+          return res.status(404).json({ message: "vendor not found" });
         return res.json({ vendor: updated });
       } catch (err) {
         console.error(err);
@@ -328,8 +333,11 @@ router.post("/vendors/:id/reject", async (req, res) => {
       try {
         const id = req.params.id;
         if (!id) return res.status(400).json({ message: "id is required" });
-        const updated = await localVendors.updateVendorById(id, { status: "rejected" });
-        if (!updated) return res.status(404).json({ message: "vendor not found" });
+        const updated = await localVendors.updateVendorById(id, {
+          status: "rejected",
+        });
+        if (!updated)
+          return res.status(404).json({ message: "vendor not found" });
         return res.json({ vendor: updated });
       } catch (err) {
         console.error(err);

@@ -94,20 +94,23 @@ router.post("/apply", upload.single("document"), async (req, res) => {
         art: "Art & Collectibles",
         wellness: "Wellness",
       };
-      const normalizedCategory = categoryMap[primary_category] || primary_category;
+      const normalizedCategory =
+        categoryMap[primary_category] || primary_category;
 
-      const { error: insertError } = await supabaseAdmin.from("vendors").insert([
-        {
-          business_name,
-          contact_email,
-          primary_category: normalizedCategory,
-          location,
-          your_story,
-          sustainability_practices: practices,
-          verification_document_url: publicUrl,
-          status: "pending",
-        },
-      ]);
+      const { error: insertError } = await supabaseAdmin
+        .from("vendors")
+        .insert([
+          {
+            business_name,
+            contact_email,
+            primary_category: normalizedCategory,
+            location,
+            your_story,
+            sustainability_practices: practices,
+            verification_document_url: publicUrl,
+            status: "pending",
+          },
+        ]);
 
       if (insertError) {
         console.error("Insert error:", insertError);
@@ -151,7 +154,8 @@ router.post("/apply", upload.single("document"), async (req, res) => {
       art: "Art & Collectibles",
       wellness: "Wellness",
     };
-    const normalizedCategory = categoryMap[primary_category] || primary_category;
+    const normalizedCategory =
+      categoryMap[primary_category] || primary_category;
 
     const vendorObj = {
       business_name,
@@ -165,7 +169,11 @@ router.post("/apply", upload.single("document"), async (req, res) => {
     };
 
     const created = await localVendors.addVendor(vendorObj);
-    return res.json({ message: "Application submitted (local)", status: "pending", vendor: created });
+    return res.json({
+      message: "Application submitted (local)",
+      status: "pending",
+      vendor: created,
+    });
   } catch (err) {
     console.error("Local vendor fallback error:", err);
     return res.status(500).json({ message: "Unexpected server error" });

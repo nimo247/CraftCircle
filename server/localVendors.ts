@@ -37,7 +37,8 @@ async function writeAll(data: any[]) {
 
 export async function getVendors(email?: string) {
   const all = await readAll();
-  if (email) return all.filter((v) => String(v.contact_email) === String(email));
+  if (email)
+    return all.filter((v) => String(v.contact_email) === String(email));
   return all.sort((a, b) => Number(b.id) - Number(a.id)).slice(0, 200);
 }
 
