@@ -35,6 +35,7 @@ router.get("/", async (req, res) => {
 
 // POST /api/orders { user_id, product_id, quantity, status }
 router.post("/", async (req, res) => {
+  if (!supabaseAdmin) return res.status(503).json({ message: "Supabase not configured" });
   try {
     const {
       user_id,
