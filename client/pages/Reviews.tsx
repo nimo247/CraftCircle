@@ -123,7 +123,7 @@ export default function ReviewsPage() {
       return;
     try {
       const adminKey =
-        (typeof window !== "undefined" && localStorage.getItem("adminKey")) ||
+        (typeof window !== "undefined" && sessionStorage.getItem("adminKey")) ||
         "";
       const res = await fetch(`/api/admin/reviews/delete`, {
         method: "POST",
@@ -162,7 +162,7 @@ export default function ReviewsPage() {
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold">All Reviews</h3>
           {typeof window !== "undefined" &&
-            localStorage.getItem("isAdmin") === "true" && (
+            sessionStorage.getItem("isAdmin") === "true" && (
               <div className="flex items-center gap-2">
                 <button
                   onClick={selectAll}
@@ -189,7 +189,7 @@ export default function ReviewsPage() {
               <div key={r.id} className="border rounded p-3">
                 <div className="flex items-start gap-3">
                   {typeof window !== "undefined" &&
-                    localStorage.getItem("isAdmin") === "true" && (
+                    sessionStorage.getItem("isAdmin") === "true" && (
                       <div className="pt-2">
                         <input
                           type="checkbox"
@@ -248,7 +248,7 @@ export default function ReviewsPage() {
                 </div>
                 {/* Admin controls */}
                 {typeof window !== "undefined" &&
-                  localStorage.getItem("isAdmin") === "true" && (
+                  sessionStorage.getItem("isAdmin") === "true" && (
                     <div className="mt-3 flex justify-end">
                       <button
                         className="px-3 py-1 text-sm rounded bg-red-600 text-white"
@@ -261,7 +261,7 @@ export default function ReviewsPage() {
                             return;
                           try {
                             const adminKey =
-                              localStorage.getItem("adminKey") || "";
+                              sessionStorage.getItem("adminKey") || "";
                             const res = await fetch(
                               `/api/admin/reviews/${encodeURIComponent(r.id)}`,
                               {
