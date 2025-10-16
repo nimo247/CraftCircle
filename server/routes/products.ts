@@ -12,12 +12,15 @@ if (SUPABASE_URL && SUPABASE_SERVICE_ROLE) {
     auth: { persistSession: false },
   });
 } else {
-  console.warn("Supabase service role or URL not set. Products route will return 503.");
+  console.warn(
+    "Supabase service role or URL not set. Products route will return 503.",
+  );
 }
 
 // GET /api/products - public listing of active products, search, filtering and pagination
 router.get("/products", async (req, res) => {
-  if (!supabaseAdmin) return res.status(503).json({ message: "Supabase not configured" });
+  if (!supabaseAdmin)
+    return res.status(503).json({ message: "Supabase not configured" });
   try {
     const idsRaw = req.query.ids as string | undefined;
     const q = ((req.query.q as string | undefined) || "").trim();

@@ -14,13 +14,16 @@ if (SUPABASE_URL && SUPABASE_SERVICE_ROLE) {
     auth: { persistSession: false },
   });
 } else {
-  console.warn("Supabase service role or URL not set. Vendor upload route will return 503.");
+  console.warn(
+    "Supabase service role or URL not set. Vendor upload route will return 503.",
+  );
 }
 
 // POST /api/vendor/apply
 // Expects multipart/form-data with fields: business_name, contact_email, primary_category, location, your_story, sustainability_practices (JSON array or comma separated), and file field 'document'
 router.post("/apply", upload.single("document"), async (req, res) => {
-  if (!supabaseAdmin) return res.status(503).json({ message: "Supabase not configured" });
+  if (!supabaseAdmin)
+    return res.status(503).json({ message: "Supabase not configured" });
   try {
     const file = req.file as Express.Multer.File | undefined;
     const {
@@ -35,7 +38,10 @@ router.post("/apply", upload.single("document"), async (req, res) => {
     if (!file) return res.status(400).json({ message: "No file uploaded" });
 
     // Validate PDF
-    if (file.mimetype !== "application/pdf" && !file.originalname.toLowerCase().endsWith(".pdf")) {
+    if (
+      file.mimetype !== "application/pdf" &&
+      !file.originalname.toLowerCase().endsWith(".pdf")
+    ) {
       return res.status(400).json({ message: "Only PDF files are allowed" });
     }
 
@@ -52,10 +58,14 @@ router.post("/apply", upload.single("document"), async (req, res) => {
 
     if (uploadError) {
       console.error("Supabase upload error:", uploadError);
-      return res.status(500).json({ message: "File upload failed", detail: uploadError });
+      return res
+        .status(500)
+        .json({ message: "File upload failed", detail: uploadError });
     }
 
-    const { data: publicData, error: publicErr } = supabaseAdmin.storage.from(bucket).getPublicUrl(filePath);
+    const { data: publicData, error: publicErr } = supabaseAdmin.storage
+      .from(bucket)
+      .getPublicUrl(filePath);
     if (publicErr) {
       console.warn("getPublicUrl error", publicErr);
     }
@@ -63,7 +73,9 @@ router.post("/apply", upload.single("document"), async (req, res) => {
 
     const practices =
       typeof sustainability_practices === "string"
-        ? (sustainability_practices?.startsWith("[") ? JSON.parse(sustainability_practices) : sustainability_practices.split(",").map((s: string) => s.trim()))
+        ? sustainability_practices?.startsWith("[")
+          ? JSON.parse(sustainability_practices)
+          : sustainability_practices.split(",").map((s: string) => s.trim())
         : sustainability_practices || [];
 
     // Normalize primary_category to values expected by the DB
@@ -73,7 +85,8 @@ router.post("/apply", upload.single("document"), async (req, res) => {
       art: "Art & Collectibles",
       wellness: "Wellness",
     };
-    const normalizedCategory = categoryMap[primary_category] || primary_category;
+    const normalizedCategory =
+      categoryMap[primary_category] || primary_category;
 
     const { error: insertError } = await supabaseAdmin.from("vendors").insert([
       {
@@ -90,7 +103,12 @@ router.post("/apply", upload.single("document"), async (req, res) => {
 
     if (insertError) {
       console.error("Insert error:", insertError);
-      return res.status(500).json({ message: "Failed to save vendor application", detail: insertError });
+      return res
+        .status(500)
+        .json({
+          message: "Failed to save vendor application",
+          detail: insertError,
+        });
     }
 
     return res.json({ message: "Application submitted", status: "pending" });

@@ -11,12 +11,15 @@ if (SUPABASE_URL && SUPABASE_SERVICE_ROLE) {
     auth: { persistSession: false },
   });
 } else {
-  console.warn("Supabase service role or URL not set. Wishlist routes will return 503.");
+  console.warn(
+    "Supabase service role or URL not set. Wishlist routes will return 503.",
+  );
 }
 
 // GET /api/wishlist?user_id=...
 router.get("/", async (req, res) => {
-  if (!supabaseAdmin) return res.status(503).json({ message: "Supabase not configured" });
+  if (!supabaseAdmin)
+    return res.status(503).json({ message: "Supabase not configured" });
   try {
     const user_id = String(req.query.user_id || "").trim();
     if (!user_id) return res.status(400).json({ error: "user_id required" });
@@ -35,7 +38,8 @@ router.get("/", async (req, res) => {
 
 // POST /api/wishlist { user_id, product_id }
 router.post("/", async (req, res) => {
-  if (!supabaseAdmin) return res.status(503).json({ message: "Supabase not configured" });
+  if (!supabaseAdmin)
+    return res.status(503).json({ message: "Supabase not configured" });
   try {
     const { user_id, product_id } = req.body || {};
     console.debug("POST /api/wishlist body:", req.body);
@@ -61,7 +65,8 @@ router.post("/", async (req, res) => {
 
 // DELETE /api/wishlist { user_id, product_id }
 router.delete("/", async (req, res) => {
-  if (!supabaseAdmin) return res.status(503).json({ message: "Supabase not configured" });
+  if (!supabaseAdmin)
+    return res.status(503).json({ message: "Supabase not configured" });
   try {
     const { user_id, product_id } = req.body || {};
     console.debug("DELETE /api/wishlist body:", req.body);

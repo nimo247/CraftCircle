@@ -5,7 +5,10 @@ import { createClient } from "@supabase/supabase-js";
 const router = express.Router();
 // configure multer with memory storage and allow configurable file size limits
 const maxFileSize = Number(process.env.UPLOAD_MAX_FILE_SIZE || 5 * 1024 * 1024); // default 5 MB
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: maxFileSize } });
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: maxFileSize },
+});
 
 const SUPABASE_URL = process.env.SUPABASE_URL || "";
 const SUPABASE_SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE || "";
@@ -23,7 +26,8 @@ if (SUPABASE_URL && SUPABASE_SERVICE_ROLE) {
 
 // GET /api/vendor/products?email=vendor@example.com
 router.get("/products", async (req, res) => {
-  if (!supabaseAdmin) return res.status(503).json({ message: "Supabase not configured" });
+  if (!supabaseAdmin)
+    return res.status(503).json({ message: "Supabase not configured" });
   try {
     const email = req.query.email as string | undefined;
     let query = supabaseAdmin
@@ -57,7 +61,8 @@ router.post(
   "/products/upload-image",
   upload.array("images"),
   async (req: any, res) => {
-    if (!supabaseAdmin) return res.status(503).json({ message: "Supabase not configured" });
+    if (!supabaseAdmin)
+      return res.status(503).json({ message: "Supabase not configured" });
     try {
       const files = req.files as Express.Multer.File[] | undefined;
       const vendor_email = req.body.vendor_email as string | undefined;
@@ -67,7 +72,9 @@ router.post(
       const bucket = "product-images";
       const urls: string[] = [];
       // add vendor folder for better organization if provided
-      const vendorFolder = vendor_email ? `${vendor_email.replace(/[^a-z0-9-_\.]/gi, "_")}` : "anonymous";
+      const vendorFolder = vendor_email
+        ? `${vendor_email.replace(/[^a-z0-9-_\.]/gi, "_")}`
+        : "anonymous";
       for (const file of files) {
         const filePath = `${vendorFolder}/${Date.now()}_${file.originalname}`;
         const { error: uploadError } = await supabaseAdmin.storage
@@ -116,13 +123,19 @@ router.post("/products", async (req, res) => {
     } = req.body as any;
 
     if ((!vendor_email && !vendor_id) || !title)
-      return res.status(400).json({ message: "vendor_email/vendor_id and title are required" });
+      return res
+        .status(400)
+        .json({ message: "vendor_email/vendor_id and title are required" });
 
     // Normalize categories/tags if provided as comma-separated strings
     const normalizeArrayField = (v: any) => {
       if (v == null) return null;
       if (Array.isArray(v)) return v.filter(Boolean);
-      if (typeof v === "string") return v.split(",").map((s) => s.trim()).filter(Boolean);
+      if (typeof v === "string")
+        return v
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean);
       return null;
     };
 
@@ -139,7 +152,8 @@ router.post("/products", async (req, res) => {
       images: images || null,
       categories: normalizeArrayField(categories),
       tags: normalizeArrayField(tags),
-      low_stock_threshold: low_stock_threshold != null ? Number(low_stock_threshold) : null,
+      low_stock_threshold:
+        low_stock_threshold != null ? Number(low_stock_threshold) : null,
       created_at: new Date().toISOString(),
     };
 
@@ -150,13 +164,17 @@ router.post("/products", async (req, res) => {
 
     if (error) {
       console.error("Insert error:", error);
-      return res.status(500).json({ message: "Failed to create product", detail: error });
+      return res
+        .status(500)
+        .json({ message: "Failed to create product", detail: error });
     }
 
     return res.json({ product: data && data[0] });
   } catch (err: any) {
     console.error(err);
-    return res.status(500).json({ message: "Unexpected server error", detail: err?.message });
+    return res
+      .status(500)
+      .json({ message: "Unexpected server error", detail: err?.message });
   }
 });
 
@@ -165,7 +183,9 @@ router.post("/products/bulk", async (req, res) => {
   try {
     const { vendor_email, products } = req.body as any;
     if (!vendor_email || !Array.isArray(products))
-      return res.status(400).json({ message: "vendor_email and products array required" });
+      return res
+        .status(400)
+        .json({ message: "vendor_email and products array required" });
     const payloads = products.map((p: any) => ({
       vendor_email,
       title: p.title,
@@ -179,10 +199,15 @@ router.post("/products/bulk", async (req, res) => {
       low_stock_threshold: p.low_stock_threshold ?? null,
       created_at: new Date().toISOString(),
     }));
-    const { data, error } = await supabaseAdmin.from("products").insert(payloads).select();
+    const { data, error } = await supabaseAdmin
+      .from("products")
+      .insert(payloads)
+      .select();
     if (error) {
       console.error("Bulk insert error:", error);
-      return res.status(500).json({ message: "Failed to insert products", detail: error });
+      return res
+        .status(500)
+        .json({ message: "Failed to insert products", detail: error });
     }
     return res.json({ products: data });
   } catch (err) {
