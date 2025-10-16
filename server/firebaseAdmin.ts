@@ -1,5 +1,5 @@
-import fs from "fs";
 import admin from "firebase-admin";
+import fs from "fs";
 
 let serviceAccount: any = undefined;
 console.log(
@@ -7,8 +7,34 @@ console.log(
   !!process.env.SERVICE_ACCOUNT_JSON,
 );
 
+// If a URL is provided that returns the service account JSON, fetch it at runtime
+// This allows keeping only a short URL in environment variables (avoids Lambda 4KB limit)
+if (process.env.SERVICE_ACCOUNT_SECRET_URL) {
+  try {
+    console.log("Fetching service account from SERVICE_ACCOUNT_SECRET_URL");
+    const res = await fetch(process.env.SERVICE_ACCOUNT_SECRET_URL);
+    if (res.ok) {
+      const text = await res.text();
+      try {
+        serviceAccount = JSON.parse(text);
+        console.log("SERVER: parsed SERVICE_ACCOUNT_SECRET_URL successfully");
+      } catch (err) {
+        console.error("Failed to parse JSON from SERVICE_ACCOUNT_SECRET_URL response:", err);
+      }
+    } else {
+      console.error(
+        "Failed to fetch SERVICE_ACCOUNT_SECRET_URL, status:",
+        res.status,
+        res.statusText,
+      );
+    }
+  } catch (err) {
+    console.error("Error fetching SERVICE_ACCOUNT_SECRET_URL:", err);
+  }
+}
+
 // Support base64-encoded service account JSON for safer env transport
-if (process.env.SERVICE_ACCOUNT_JSON_B64) {
+if (!serviceAccount && process.env.SERVICE_ACCOUNT_JSON_B64) {
   try {
     const decoded = Buffer.from(
       process.env.SERVICE_ACCOUNT_JSON_B64,
@@ -81,7 +107,7 @@ if (!admin.apps.length) {
 
   try {
     admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount as any),
+      credential: serviceAccount ? admin.credential.cert(serviceAccount as any) : undefined,
     });
   } catch (err) {
     console.error("Failed to initialize firebase-admin:", err);
