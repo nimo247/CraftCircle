@@ -133,4 +133,38 @@ router.post("/reviews/delete", async (req, res) => {
   }
 });
 
+// POST /api/admin/vendors/:id/approve - set vendor status to approved
+router.post("/vendors/:id/approve", async (req, res) => {
+  try {
+    const id = req.params.id;
+    if (!id) return res.status(400).json({ message: "id is required" });
+    const { data, error } = await supabaseAdmin.from("vendors").update({ status: "approved" }).eq("id", id).select();
+    if (error) {
+      console.error("Supabase update error (approve):", error);
+      return res.status(500).json({ message: "Failed to approve vendor", detail: error });
+    }
+    return res.json({ vendor: data && data[0] });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Unexpected server error" });
+  }
+});
+
+// POST /api/admin/vendors/:id/reject - set vendor status to rejected
+router.post("/vendors/:id/reject", async (req, res) => {
+  try {
+    const id = req.params.id;
+    if (!id) return res.status(400).json({ message: "id is required" });
+    const { data, error } = await supabaseAdmin.from("vendors").update({ status: "rejected" }).eq("id", id).select();
+    if (error) {
+      console.error("Supabase update error (reject):", error);
+      return res.status(500).json({ message: "Failed to reject vendor", detail: error });
+    }
+    return res.json({ vendor: data && data[0] });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Unexpected server error" });
+  }
+});
+
 export default router;
