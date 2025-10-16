@@ -25,7 +25,9 @@ if (SUPABASE_URL && SUPABASE_SERVICE_ROLE) {
   supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     auth: { persistSession: false },
   });
-  console.warn("Supabase service role not set; falling back to anon key for public reads (read-only).");
+  console.warn(
+    "Supabase service role not set; falling back to anon key for public reads (read-only).",
+  );
 } else {
   console.warn(
     "Supabase URL and keys not set. Vendor products route will return 503.",
@@ -69,8 +71,12 @@ router.post(
   "/products/upload-image",
   upload.array("images"),
   async (req: any, res) => {
-    if (!supabaseAdmin) return res.status(503).json({ message: "Supabase not configured" });
-    if (!supabaseIsServiceRole) return res.status(403).json({ message: "Image uploads require Supabase service role" });
+    if (!supabaseAdmin)
+      return res.status(503).json({ message: "Supabase not configured" });
+    if (!supabaseIsServiceRole)
+      return res
+        .status(403)
+        .json({ message: "Image uploads require Supabase service role" });
     try {
       const files = req.files as Express.Multer.File[] | undefined;
       const vendor_email = req.body.vendor_email as string | undefined;

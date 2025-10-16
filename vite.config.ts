@@ -9,7 +9,12 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
     fs: {
-      allow: [path.resolve(__dirname, "./client"), path.resolve(__dirname, "./shared"), path.resolve(__dirname, "./node_modules/vite/dist/client"), path.resolve(__dirname, ".")],
+      allow: [
+        path.resolve(__dirname, "./client"),
+        path.resolve(__dirname, "./shared"),
+        path.resolve(__dirname, "./node_modules/vite/dist/client"),
+        path.resolve(__dirname, "."),
+      ],
       deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**", "server/**"],
     },
   },
@@ -20,10 +25,10 @@ export default defineConfig(({ mode }) => ({
       output: {
         manualChunks(id) {
           if (!id) return undefined;
-          if (id.includes('node_modules')) {
-            if (id.includes('firebase')) return 'firebase-vendor';
-            if (id.includes('@supabase')) return 'supabase-vendor';
-            return 'vendor';
+          if (id.includes("node_modules")) {
+            if (id.includes("firebase")) return "firebase-vendor";
+            if (id.includes("@supabase")) return "supabase-vendor";
+            return "vendor";
           }
         },
       },

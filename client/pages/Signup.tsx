@@ -10,7 +10,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { createUserEmailNoAutoSign, signInEmail, resendVerification, auth } from "@/firebase";
+import {
+  createUserEmailNoAutoSign,
+  signInEmail,
+  resendVerification,
+  auth,
+} from "@/firebase";
 
 export default function Signup() {
   const [email, setEmail] = useState("");
@@ -28,7 +33,8 @@ export default function Signup() {
     setError(null);
     setShowSignInLink(false);
 
-    if (!email || !password) return setError("Please provide email and password");
+    if (!email || !password)
+      return setError("Please provide email and password");
     setLoading(true);
     try {
       const { createUserEmailNoAutoSign } = await import("@/firebase");
@@ -42,7 +48,10 @@ export default function Signup() {
       const rawMsg = String(err?.message || err?.toString() || "Signup failed");
 
       // If email already exists, attempt to sign in with provided credentials
-      if (rawMsg.includes("EMAIL_EXISTS") || rawMsg.includes("email-already-in-use")) {
+      if (
+        rawMsg.includes("EMAIL_EXISTS") ||
+        rawMsg.includes("email-already-in-use")
+      ) {
         try {
           setError(null);
           // Attempt sign-in using the same credentials
@@ -69,17 +78,34 @@ export default function Signup() {
         } catch (signErr: any) {
           const signMsg = String(signErr?.message || signErr?.toString() || "");
           // If sign-in failed because email not verified, show friendly message and allow resend
-          if (signMsg.toLowerCase().includes("verify") || signMsg.toLowerCase().includes("not verified") || signMsg.toLowerCase().includes("email-not-verified")) {
-            setError("Your email is registered but not verified. Please verify your email or resend verification.");
-          } else if (signMsg.includes("wrong-password") || signMsg.toLowerCase().includes("password")) {
-            setError("An account with that email exists. The password you entered does not match. Please sign in instead.");
+          if (
+            signMsg.toLowerCase().includes("verify") ||
+            signMsg.toLowerCase().includes("not verified") ||
+            signMsg.toLowerCase().includes("email-not-verified")
+          ) {
+            setError(
+              "Your email is registered but not verified. Please verify your email or resend verification.",
+            );
+          } else if (
+            signMsg.includes("wrong-password") ||
+            signMsg.toLowerCase().includes("password")
+          ) {
+            setError(
+              "An account with that email exists. The password you entered does not match. Please sign in instead.",
+            );
             setShowSignInLink(true);
           } else {
-            setError("An account with that email already exists. Try signing in instead.");
+            setError(
+              "An account with that email already exists. Try signing in instead.",
+            );
             setShowSignInLink(true);
           }
         }
-      } else if (rawMsg.includes("network-request-failed") || rawMsg.includes("NETWORK") || rawMsg.includes("network")) {
+      } else if (
+        rawMsg.includes("network-request-failed") ||
+        rawMsg.includes("NETWORK") ||
+        rawMsg.includes("network")
+      ) {
         setError(
           "Network error: failed to reach Firebase. Try opening the app in a new tab or check your network/authorized domains.",
         );
@@ -99,7 +125,9 @@ export default function Signup() {
       const { signInEmail } = await import("@/firebase");
       await signInEmail(email, password);
       // server verify
-      const token = await (await import("@/firebase")).auth.currentUser?.getIdToken();
+      const token = await (
+        await import("@/firebase")
+      ).auth.currentUser?.getIdToken();
       if (token) {
         const res = await fetch("/api/auth/verify", {
           method: "POST",
@@ -112,14 +140,19 @@ export default function Signup() {
       navigate("/");
     } catch (err: any) {
       console.error(err);
-      alert(err?.message || "Sign-in failed. Ensure you have verified your email.");
+      alert(
+        err?.message || "Sign-in failed. Ensure you have verified your email.",
+      );
     } finally {
       setLoading(false);
     }
   };
 
   const resendVerificationClick = async () => {
-    if (!email || !password) return setError("Enter the same email and password used during signup to resend verification.");
+    if (!email || !password)
+      return setError(
+        "Enter the same email and password used during signup to resend verification.",
+      );
     setLoading(true);
     try {
       const { resendVerification } = await import("@/firebase");
@@ -223,7 +256,10 @@ export default function Signup() {
               </div>
 
               <div className="mt-4 text-sm text-muted-foreground">
-                No account? <a href="/auth" className="text-primary underline">Sign in</a>
+                No account?{" "}
+                <a href="/auth" className="text-primary underline">
+                  Sign in
+                </a>
               </div>
             </CardContent>
           </Card>

@@ -15,8 +15,12 @@ if (SUPABASE_URL && SUPABASE_SERVICE_ROLE) {
   supabaseIsServiceRole = true;
 } else if (SUPABASE_URL && SUPABASE_ANON_KEY) {
   // do not enable wishlist writes without service role
-  supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: false } });
-  console.warn("Supabase service role not set; wishlist write operations will be blocked.");
+  supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: false },
+  });
+  console.warn(
+    "Supabase service role not set; wishlist write operations will be blocked.",
+  );
 } else {
   console.warn(
     "Supabase URL and keys not set. Wishlist routes will return 503.",
@@ -45,8 +49,12 @@ router.get("/", async (req, res) => {
 
 // POST /api/wishlist { user_id, product_id }
 router.post("/", async (req, res) => {
-  if (!supabaseAdmin) return res.status(503).json({ message: "Supabase not configured" });
-  if (!supabaseIsServiceRole) return res.status(403).json({ message: "Wishlist writes require Supabase service role" });
+  if (!supabaseAdmin)
+    return res.status(503).json({ message: "Supabase not configured" });
+  if (!supabaseIsServiceRole)
+    return res
+      .status(403)
+      .json({ message: "Wishlist writes require Supabase service role" });
   try {
     const { user_id, product_id } = req.body || {};
     console.debug("POST /api/wishlist body:", req.body);
@@ -72,8 +80,12 @@ router.post("/", async (req, res) => {
 
 // DELETE /api/wishlist { user_id, product_id }
 router.delete("/", async (req, res) => {
-  if (!supabaseAdmin) return res.status(503).json({ message: "Supabase not configured" });
-  if (!supabaseIsServiceRole) return res.status(403).json({ message: "Wishlist writes require Supabase service role" });
+  if (!supabaseAdmin)
+    return res.status(503).json({ message: "Supabase not configured" });
+  if (!supabaseIsServiceRole)
+    return res
+      .status(403)
+      .json({ message: "Wishlist writes require Supabase service role" });
   try {
     const { user_id, product_id } = req.body || {};
     console.debug("DELETE /api/wishlist body:", req.body);

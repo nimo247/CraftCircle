@@ -20,7 +20,9 @@ if (SUPABASE_URL && SUPABASE_SERVICE_ROLE) {
   supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     auth: { persistSession: false },
   });
-  console.warn("Supabase service role not set; vendor upload will be disabled (requires service role).");
+  console.warn(
+    "Supabase service role not set; vendor upload will be disabled (requires service role).",
+  );
 } else {
   console.warn(
     "Supabase URL and keys not set. Vendor upload route will return 503.",
@@ -30,8 +32,12 @@ if (SUPABASE_URL && SUPABASE_SERVICE_ROLE) {
 // POST /api/vendor/apply
 // Expects multipart/form-data with fields: business_name, contact_email, primary_category, location, your_story, sustainability_practices (JSON array or comma separated), and file field 'document'
 router.post("/apply", upload.single("document"), async (req, res) => {
-  if (!supabaseAdmin) return res.status(503).json({ message: "Supabase not configured" });
-  if (!supabaseIsServiceRole) return res.status(403).json({ message: "Vendor uploads require Supabase service role" });
+  if (!supabaseAdmin)
+    return res.status(503).json({ message: "Supabase not configured" });
+  if (!supabaseIsServiceRole)
+    return res
+      .status(403)
+      .json({ message: "Vendor uploads require Supabase service role" });
   try {
     const file = req.file as Express.Multer.File | undefined;
     const {
@@ -111,12 +117,10 @@ router.post("/apply", upload.single("document"), async (req, res) => {
 
     if (insertError) {
       console.error("Insert error:", insertError);
-      return res
-        .status(500)
-        .json({
-          message: "Failed to save vendor application",
-          detail: insertError,
-        });
+      return res.status(500).json({
+        message: "Failed to save vendor application",
+        detail: insertError,
+      });
     }
 
     return res.json({ message: "Application submitted", status: "pending" });

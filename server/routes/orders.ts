@@ -14,8 +14,12 @@ if (SUPABASE_URL && SUPABASE_SERVICE_ROLE) {
   });
   supabaseIsServiceRole = true;
 } else if (SUPABASE_URL && SUPABASE_ANON_KEY) {
-  supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: false } });
-  console.warn("Supabase service role not set; orders API will be limited and writes disabled.");
+  supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: false },
+  });
+  console.warn(
+    "Supabase service role not set; orders API will be limited and writes disabled.",
+  );
 } else {
   console.warn(
     "Supabase service role or URL not set. Orders routes will return 503.",
@@ -24,8 +28,12 @@ if (SUPABASE_URL && SUPABASE_SERVICE_ROLE) {
 
 // GET /api/orders?user_id=...
 router.get("/", async (req, res) => {
-  if (!supabaseAdmin) return res.status(503).json({ message: "Supabase not configured" });
-  if (!supabaseIsServiceRole) return res.status(403).json({ message: "Orders API requires Supabase service role" });
+  if (!supabaseAdmin)
+    return res.status(503).json({ message: "Supabase not configured" });
+  if (!supabaseIsServiceRole)
+    return res
+      .status(403)
+      .json({ message: "Orders API requires Supabase service role" });
   try {
     const user_id = String(req.query.user_id || "").trim();
     if (!user_id) return res.status(400).json({ error: "user_id required" });
@@ -44,8 +52,12 @@ router.get("/", async (req, res) => {
 
 // POST /api/orders { user_id, product_id, quantity, status }
 router.post("/", async (req, res) => {
-  if (!supabaseAdmin) return res.status(503).json({ message: "Supabase not configured" });
-  if (!supabaseIsServiceRole) return res.status(403).json({ message: "Orders writes require Supabase service role" });
+  if (!supabaseAdmin)
+    return res.status(503).json({ message: "Supabase not configured" });
+  if (!supabaseIsServiceRole)
+    return res
+      .status(403)
+      .json({ message: "Orders writes require Supabase service role" });
   try {
     const {
       user_id,
@@ -79,8 +91,12 @@ router.post("/", async (req, res) => {
 
 // DELETE /api/orders - body: { user_id, order_id?, product_id? }
 router.delete("/", async (req, res) => {
-  if (!supabaseAdmin) return res.status(503).json({ message: "Supabase not configured" });
-  if (!supabaseIsServiceRole) return res.status(403).json({ message: "Orders writes require Supabase service role" });
+  if (!supabaseAdmin)
+    return res.status(503).json({ message: "Supabase not configured" });
+  if (!supabaseIsServiceRole)
+    return res
+      .status(403)
+      .json({ message: "Orders writes require Supabase service role" });
   try {
     const { user_id, order_id, product_id } = req.body || {};
     if (!user_id) return res.status(400).json({ error: "user_id required" });

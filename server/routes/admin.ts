@@ -19,18 +19,21 @@ if (SUPABASE_URL && SUPABASE_SERVICE_ROLE) {
   supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     auth: { persistSession: false },
   });
-  console.warn("Supabase service role not set; admin routes will be limited and may return 403 for protected actions.");
-} else {
   console.warn(
-    "Supabase URL and keys not set. Admin routes will return 503.",
+    "Supabase service role not set; admin routes will be limited and may return 403 for protected actions.",
   );
+} else {
+  console.warn("Supabase URL and keys not set. Admin routes will return 503.");
 }
 
 // GET /api/admin/vendors - returns list of vendors (admin use)
 router.get("/vendors", async (req, res) => {
   if (!supabaseAdmin)
     return res.status(503).json({ message: "Supabase not configured" });
-  if (!supabaseIsServiceRole) return res.status(403).json({ message: "Admin actions require Supabase service role" });
+  if (!supabaseIsServiceRole)
+    return res
+      .status(403)
+      .json({ message: "Admin actions require Supabase service role" });
   try {
     const email = req.query.email as string | undefined;
     let query = supabaseAdmin
@@ -63,7 +66,10 @@ router.get("/vendors", async (req, res) => {
 router.post("/vendors/verify", async (req, res) => {
   if (!supabaseAdmin)
     return res.status(503).json({ message: "Supabase not configured" });
-  if (!supabaseIsServiceRole) return res.status(403).json({ message: "Admin actions require Supabase service role" });
+  if (!supabaseIsServiceRole)
+    return res
+      .status(403)
+      .json({ message: "Admin actions require Supabase service role" });
   try {
     const { email } = req.body as { email?: string };
     if (!email) return res.status(400).json({ message: "email is required" });
@@ -90,7 +96,10 @@ router.post("/vendors/verify", async (req, res) => {
 router.patch("/vendors/:id", async (req, res) => {
   if (!supabaseAdmin)
     return res.status(503).json({ message: "Supabase not configured" });
-  if (!supabaseIsServiceRole) return res.status(403).json({ message: "Admin actions require Supabase service role" });
+  if (!supabaseIsServiceRole)
+    return res
+      .status(403)
+      .json({ message: "Admin actions require Supabase service role" });
   try {
     const id = req.params.id;
     console.log("ADMIN PATCH /vendors/:id called", { id, method: req.method });
@@ -119,12 +128,10 @@ router.patch("/vendors/:id", async (req, res) => {
     if (typeof status === "string") status = status.trim();
     if (!status) {
       console.warn("Missing status on request", { id });
-      return res
-        .status(400)
-        .json({
-          message: "status is required",
-          debug: { headers: req.headers, query: req.query, body: req.body },
-        });
+      return res.status(400).json({
+        message: "status is required",
+        debug: { headers: req.headers, query: req.query, body: req.body },
+      });
     }
     const { data, error } = await supabaseAdmin
       .from("vendors")
@@ -148,7 +155,10 @@ router.patch("/vendors/:id", async (req, res) => {
 router.delete("/reviews/:id", async (req, res) => {
   if (!supabaseAdmin)
     return res.status(503).json({ message: "Supabase not configured" });
-  if (!supabaseIsServiceRole) return res.status(403).json({ message: "Admin actions require Supabase service role" });
+  if (!supabaseIsServiceRole)
+    return res
+      .status(403)
+      .json({ message: "Admin actions require Supabase service role" });
   try {
     const id = req.params.id;
     if (!id) return res.status(400).json({ message: "id is required" });
@@ -182,7 +192,10 @@ router.delete("/reviews/:id", async (req, res) => {
 router.post("/reviews/delete", async (req, res) => {
   if (!supabaseAdmin)
     return res.status(503).json({ message: "Supabase not configured" });
-  if (!supabaseIsServiceRole) return res.status(403).json({ message: "Admin actions require Supabase service role" });
+  if (!supabaseIsServiceRole)
+    return res
+      .status(403)
+      .json({ message: "Admin actions require Supabase service role" });
   try {
     const ids = (req.body && req.body.ids) || [];
     if (!Array.isArray(ids) || ids.length === 0)
@@ -217,7 +230,10 @@ router.post("/reviews/delete", async (req, res) => {
 router.post("/vendors/:id/approve", async (req, res) => {
   if (!supabaseAdmin)
     return res.status(503).json({ message: "Supabase not configured" });
-  if (!supabaseIsServiceRole) return res.status(403).json({ message: "Admin actions require Supabase service role" });
+  if (!supabaseIsServiceRole)
+    return res
+      .status(403)
+      .json({ message: "Admin actions require Supabase service role" });
   try {
     const id = req.params.id;
     console.log("ADMIN POST approve called", {
@@ -248,7 +264,10 @@ router.post("/vendors/:id/approve", async (req, res) => {
 router.post("/vendors/:id/reject", async (req, res) => {
   if (!supabaseAdmin)
     return res.status(503).json({ message: "Supabase not configured" });
-  if (!supabaseIsServiceRole) return res.status(403).json({ message: "Admin actions require Supabase service role" });
+  if (!supabaseIsServiceRole)
+    return res
+      .status(403)
+      .json({ message: "Admin actions require Supabase service role" });
   try {
     const id = req.params.id;
     console.log("ADMIN POST reject called", {

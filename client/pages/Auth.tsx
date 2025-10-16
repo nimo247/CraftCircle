@@ -12,7 +12,13 @@ import { Separator } from "@/components/ui/separator";
 import { Globe, Facebook } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { signInWithGooglePopup, createUserEmailNoAutoSign, signInEmail, signInEmailNoVerify, resendVerification } from "@/firebase";
+import {
+  signInWithGooglePopup,
+  createUserEmailNoAutoSign,
+  signInEmail,
+  signInEmailNoVerify,
+  resendVerification,
+} from "@/firebase";
 
 export default function Auth() {
   const location = useLocation();

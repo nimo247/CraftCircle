@@ -19,7 +19,9 @@ if (SUPABASE_URL && SUPABASE_SERVICE_ROLE) {
   supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     auth: { persistSession: false },
   });
-  console.warn("Supabase service role not set; falling back to anon key for public reads (read-only).");
+  console.warn(
+    "Supabase service role not set; falling back to anon key for public reads (read-only).",
+  );
 } else {
   console.warn(
     "Supabase URL and keys not set. Products route will return 503.",
