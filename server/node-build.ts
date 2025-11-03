@@ -24,6 +24,13 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(distPath, "index.html"));
 });
 
+// debug helpers - remove after troubleshooting
+console.log("ENV vars with placeholders:", Object.entries(process.env).filter(([,v]) => typeof v==='string' && v.includes("${")));
+console.log("Registered routes:");
+app._router?.stack?.forEach((layer:any) => {
+  if (layer.route) console.log(Object.keys(layer.route.methods).join(","), layer.route.path);
+});
+
 app.listen(port, () => {
   console.log(`🚀 Fusion Starter server running on port ${port}`);
   console.log(`📱 Frontend: http://localhost:${port}`);
