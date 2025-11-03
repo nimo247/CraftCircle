@@ -193,14 +193,14 @@ export default function Admin() {
                                 size="sm"
                                 onClick={async () => {
                                   try {
-                                    const res = await fetch(`/api/admin/vendors/${v.id}/approve`, {
-                                        method: "POST",
-                                        headers: {
-                                          "Content-Type": "application/json",
-                                        },
-                                      });
-                                    if (!res.ok)
+                                    const res = await fetch(`/api/admin/vendors/approve?id=${encodeURIComponent(v.id)}`, {
+                                    method: "POST",
+                                  });
+                                    if (!res.ok) {
+                                      const body = await res.text().catch(() => (""));
+                                      console.error('approve failed', res.status, body);
                                       throw new Error("Failed to approve");
+                                    }
                                     const data = await res.json();
                                     setVendors((s) =>
                                       s
@@ -224,14 +224,14 @@ export default function Admin() {
                                 variant="destructive"
                                 onClick={async () => {
                                   try {
-                                    const res = await fetch(`/api/admin/vendors/${v.id}/reject`, {
+                                    const res = await fetch(`/api/admin/vendors/reject?id=${encodeURIComponent(v.id)}`, {
                                         method: "POST",
-                                        headers: {
-                                          "Content-Type": "application/json",
-                                        },
                                       });
-                                    if (!res.ok)
+                                    if (!res.ok) {
+                                      const body = await res.text().catch(() => (""));
+                                      console.error('reject failed', res.status, body);
                                       throw new Error("Failed to reject");
+                                    }
                                     const data = await res.json();
                                     setVendors((s) =>
                                       s
