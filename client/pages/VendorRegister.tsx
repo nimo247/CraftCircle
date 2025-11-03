@@ -122,33 +122,49 @@ export default function VendorRegister() {
       // Do NOT create Firebase user here. Store the application; admin will create the account and notify the user upon approval.
 
       // Proceed to submit vendor application to server
-      const form = new FormData();
-      form.append("business_name", data.businessName);
-      form.append("contact_email", data.email);
-      form.append("primary_category", data.category);
-      form.append("location", data.location);
-      form.append("your_story", data.story);
-      form.append(
-        "sustainability_practices",
-        JSON.stringify(data.sustainability),
-      );
-      // append first file only for demo
-      form.append("document", fileObjects[0]);
+      // Convert document to base64 and send JSON payload (easier to handle in Vercel serverless)
+      const file = fileObjects[0];
+      const arrayBuffer = await file.arrayBuffer();
+      const arrayToBase64 = (buffer: ArrayBuffer) => {
+        const bytes = new Uint8Array(buffer);
+        const chunkSize = 0x8000; // 32KB chunks
+        let binary = '';
+        for (let i = 0; i < bytes.length; i += chunkSize) {
+          binary += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + chunkSize)));
+        }
+        return btoa(binary);
+      };
+      const base64 = arrayToBase64(arrayBuffer);
 
-      const res = await fetch("/api/vendor/apply", {
-        method: "POST",
-        body: form,
+      const payload = {
+        business_name: data.businessName,
+        contact_email: data.email,
+        primary_category: data.category,
+        location: data.location,
+        your_story: data.story,
+        sustainability_practices: data.sustainability,
+        document: {
+          name: file.name,
+          type: file.type,
+          base64,
+        },
+      };
+
+      const res = await fetch('/api/vendor/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       });
 
       const json = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setUploadError(json?.message || json?.detail || "Upload failed");
+        setUploadError(json?.message || json?.detail || 'Upload failed');
         setSubmitting(false);
         return;
       }
 
       setStep(4);
-      setApplicationStatus("pending");
+      setApplicationStatus('pending');
       setSubmitting(false);
     } catch (err) {
       console.error(err);
