@@ -1,0 +1,95 @@
+import { createClient } from '@supabase/supabase-js';
+
+// Vercel Serverless Function handler
+export default async function handler(req: any, res: any) {
+  if (req.method !== 'POST') {
+    res.status(405).json({ message: 'Method not allowed' });
+    return;
+  }
+
+  try {
+    const {
+      business_name,
+      contact_email,
+      primary_category,
+      location,
+      your_story,
+      sustainability_practices,
+      document,
+    } = req.body || {};
+
+    if (!document || !document.base64 || !document.name) {
+      return res.status(400).json({ message: 'No document provided' });
+    }
+
+    const SUPABASE_URL = process.env.SUPABASE_URL || '';
+    const SUPABASE_SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE || '';
+
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE) {
+      console.warn('Supabase service role or URL not set.');
+      return res.status(500).json({ message: 'Server not configured' });
+    }
+
+    const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE, {
+      auth: { persistSession: false },
+    });
+
+    const buffer = Buffer.from(document.base64, 'base64');
+    const bucket = 'vendor-documents';
+    const filePath = `vendor_docs/${Date.now()}_${document.name}`;
+
+    const { error: uploadError } = await supabaseAdmin.storage
+      .from(bucket)
+      .upload(filePath, buffer, {
+        contentType: document.type || 'application/pdf',
+        upsert: false,
+      } as any);
+
+    if (uploadError) {
+      console.error('Supabase upload error:', uploadError);
+      return res.status(500).json({ message: 'File upload failed', detail: uploadError });
+    }
+
+    const { data: publicData, error: publicErr } = supabaseAdmin.storage.from(bucket).getPublicUrl(filePath);
+    if (publicErr) {
+      console.warn('getPublicUrl error', publicErr);
+    }
+    const publicUrl = publicData?.publicUrl ?? null;
+
+    const practices =
+      typeof sustainability_practices === 'string'
+        ? (sustainability_practices?.startsWith('[') ? JSON.parse(sustainability_practices) : sustainability_practices.split(',').map((s: string) => s.trim()))
+        : sustainability_practices || [];
+
+    const categoryMap: Record<string, string> = {
+      home: 'Home & Living',
+      fashion: 'Fashion & Accessories',
+      art: 'Art & Collectibles',
+      wellness: 'Wellness',
+    };
+    const normalizedCategory = categoryMap[primary_category] || primary_category;
+
+    const { error: insertError } = await supabaseAdmin.from('vendors').insert([
+      {
+        business_name,
+        contact_email,
+        primary_category: normalizedCategory,
+        location,
+        your_story,
+        sustainability_practices: practices,
+        verification_document_url: publicUrl,
+        status: 'pending',
+      },
+    ]);
+
+    if (insertError) {
+      console.error('Insert error:', insertError);
+      return res.status(500).json({ message: 'Failed to save vendor application', detail: insertError });
+    }
+
+    return res.json({ message: 'Application submitted', status: 'pending' });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Unexpected server error' });
+  }
+}
