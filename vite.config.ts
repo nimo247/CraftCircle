@@ -9,12 +9,17 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
     fs: {
-      allow: [path.resolve(__dirname, "./client"), path.resolve(__dirname, "./shared"), path.resolve(__dirname, "./node_modules/vite/dist/client"), path.resolve(__dirname, ".")],
+      allow: [
+        path.resolve(__dirname, "./client"),
+        path.resolve(__dirname, "./shared"),
+        path.resolve(__dirname, "./node_modules/vite/dist/client"),
+        path.resolve(__dirname, "."),
+      ],
       deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**", "server/**"],
     },
   },
   build: {
-    chunkSizeWarningLimit: 700000
+    chunkSizeWarningLimit: 700000, // ← Missing comma added here ✅
     outDir: "dist/spa",
   },
   plugins: [react(), expressPlugin()],
