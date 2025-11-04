@@ -1,7 +1,5 @@
 import * as supabaseLib from '@supabase/supabase-js';
 
-import * as supabaseLib from '@supabase/supabase-js';
-
 // Vercel Serverless Function handler
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
