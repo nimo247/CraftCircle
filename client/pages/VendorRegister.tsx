@@ -143,6 +143,7 @@ export default function VendorRegister() {
         location: data.location,
         your_story: data.story,
         sustainability_practices: data.sustainability,
+        password: data.password || null,
         document: {
           name: file.name,
           type: file.type,
