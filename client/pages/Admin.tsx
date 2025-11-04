@@ -196,12 +196,13 @@ export default function Admin() {
                                     const res = await fetch(`/api/admin/vendors/approve?id=${encodeURIComponent(v.id)}`, {
                                     method: "POST",
                                   });
+                                    const bodyText = await res.text().catch(() => "");
                                     if (!res.ok) {
-                                      const body = await res.text().catch(() => (""));
-                                      console.error('approve failed', res.status, body);
+                                      console.error('approve failed', res.status, bodyText);
                                       throw new Error("Failed to approve");
                                     }
-                                    const data = await res.json();
+                                    const data = JSON.parse(bodyText || '{}');
+                                    // Update list
                                     setVendors((s) =>
                                       s
                                         ? s.map((x) =>
@@ -209,6 +210,19 @@ export default function Admin() {
                                           )
                                         : s,
                                     );
+                                    // If a reset link was returned, copy to clipboard and notify admin
+                                    if (data && data.resetLink) {
+                                      try {
+                                        await navigator.clipboard.writeText(data.resetLink);
+                                        alert('Vendor approved. Password reset link copied to clipboard — send it to the vendor or open it now.');
+                                      } catch (e) {
+                                        // fallback: open in new tab
+                                        window.open(data.resetLink, '_blank');
+                                        alert('Vendor approved. Reset link opened in a new tab.');
+                                      }
+                                    } else {
+                                      alert('Vendor approved.');
+                                    }
                                   } catch (err) {
                                     console.error(err);
                                     alert("Failed to approve vendor");
