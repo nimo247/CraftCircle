@@ -55,4 +55,78 @@ export async function resendVerification(email: string, password: string) {
   return { email: data.user?.email };
 }
 
-export const auth = supabase.auth;
+// Provide a tiny firebase-like shim for auth so existing components using firebase API continue to work
+export function onAuthStateChanged(authOrCallback: any, maybeCb?: any) {
+  // Support both signatures: (auth, cb) and (cb)
+  let cb = maybeCb;
+  let targetAuth = authOrCallback;
+  if (typeof authOrCallback === 'function') {
+    cb = authOrCallback;
+    targetAuth = null;
+  }
+  if (!cb) return () => {};
+  try {
+    // if targetAuth is provided and has firebase-like API
+    if (targetAuth && typeof targetAuth.onAuthStateChanged === 'function') {
+      return targetAuth.onAuthStateChanged(cb);
+    }
+    // use supabase/session-based listener
+    const init = async () => {
+      try {
+        const { data } = await supabase.auth.getSession();
+        const user = data?.session?.user ?? null;
+        cb(user);
+      } catch (_) {
+        cb(null);
+      }
+    };
+    init();
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
+      cb(session?.user ?? null);
+    });
+
+    return () => { try { listener?.subscription?.unsubscribe?.(); } catch (_) {} };
+  } catch (e) {
+    return () => {};
+  }
+}
+
+export const auth: any = {
+  currentUser: null,
+  onAuthStateChanged(callback: (u: any) => void) {
+    // initialize current user
+    try {
+      supabase.auth.getSession().then(({ data }) => {
+        auth.currentUser = data?.session?.user ?? null;
+        callback(auth.currentUser);
+      }).catch(() => {
+        callback(null);
+      });
+    } catch (_) {
+      callback(null);
+    }
+
+    // subscribe to changes
+    const { data: listener } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
+      auth.currentUser = session?.user ?? null;
+      callback(auth.currentUser);
+    });
+
+    return () => {
+      try {
+        listener?.subscription?.unsubscribe?.();
+      } catch (_) {}
+    };
+  },
+  // minimal signOut passthrough
+  signOut: async () => supabase.auth.signOut(),
+};
+
+// global fallbacks for any leftover runtime references
+try {
+  // @ts-ignore
+  window.onAuthStateChanged = onAuthStateChanged;
+  // @ts-ignore
+  window.__getAuth = () => auth;
+} catch (_) {}
