@@ -1,5 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
+import { createClient } from '@supabase/supabase-js';
+
 // Vercel Serverless Function handler
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
@@ -92,7 +94,7 @@ export default async function handler(req: any, res: any) {
     let authUser = null;
     if (providedPassword) {
       try {
-        const { data: userData, error: userErr } = await supabaseAdmin.auth.admin.createUser({
+        const { data: userData, error: userErr } = await (supabaseAdmin.auth as any).admin.createUser({
           email: contact_email,
           password: providedPassword,
           email_confirm: false,
