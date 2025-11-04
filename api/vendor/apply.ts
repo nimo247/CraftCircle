@@ -1,6 +1,6 @@
-import { createClient } from '@supabase/supabase-js';
+import * as supabaseJs from '@supabase/supabase-js';
 
-import { createClient } from '@supabase/supabase-js';
+import * as supabaseJs from '@supabase/supabase-js';
 
 // Vercel Serverless Function handler
 export default async function handler(req: any, res: any) {
@@ -32,7 +32,7 @@ export default async function handler(req: any, res: any) {
       return res.status(500).json({ message: 'Server not configured' });
     }
 
-    const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE, {
+    const supabaseAdmin = (supabaseJs as any).createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE, {
       auth: { persistSession: false },
     });
 
