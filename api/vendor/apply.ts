@@ -69,7 +69,7 @@ export default async function handler(req: any, res: any) {
     };
     const normalizedCategory = categoryMap[primary_category] || primary_category;
 
-    const { error: insertError } = await supabaseAdmin.from('vendors').insert([
+    const { data: inserted, error: insertError } = await supabaseAdmin.from('vendors').insert([
       {
         business_name,
         contact_email,
@@ -80,14 +80,35 @@ export default async function handler(req: any, res: any) {
         verification_document_url: publicUrl,
         status: 'pending',
       },
-    ]);
+    ]).select();
 
     if (insertError) {
       console.error('Insert error:', insertError);
       return res.status(500).json({ message: 'Failed to save vendor application', detail: insertError });
     }
 
-    return res.json({ message: 'Application submitted', status: 'pending' });
+    // If a password was provided, create a Supabase Auth user using the service role
+    const providedPassword = req.body?.password;
+    let authUser = null;
+    if (providedPassword) {
+      try {
+        const { data: userData, error: userErr } = await supabaseAdmin.auth.admin.createUser({
+          email: contact_email,
+          password: providedPassword,
+          email_confirm: false,
+        } as any);
+        if (userErr) {
+          // If user already exists, ignore this error
+          console.warn('Supabase createUser error (non-fatal):', userErr);
+        } else {
+          authUser = userData;
+        }
+      } catch (e) {
+        console.error('Error creating supabase auth user:', e);
+      }
+    }
+
+    return res.json({ message: 'Application submitted', status: 'pending', vendor: (inserted && inserted[0]) || null, authUser });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: 'Unexpected server error' });
