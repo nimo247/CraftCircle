@@ -458,6 +458,7 @@ export default function Auth() {
 
                         <div className="flex flex-col gap-3">
                           <Button
+                            type="button"
                             variant="outline"
                             className="w-full inline-flex items-center justify-center gap-3 py-3 text-sm font-medium text-foreground"
                             onClick={handleGoogleSignIn}
@@ -466,6 +467,7 @@ export default function Auth() {
                             <span>Continue with Google</span>
                           </Button>
                           <Button
+                            type="button"
                             variant="outline"
                             className="w-full inline-flex items-center justify-center gap-3 py-3 text-sm font-medium text-foreground"
                             onClick={() => alert("Simulated Facebook login")}
