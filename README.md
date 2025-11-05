@@ -1,3 +1,3 @@
 
-https://craftcircle.netlify.app/
+https://craftcircle.vercel.app/
 
