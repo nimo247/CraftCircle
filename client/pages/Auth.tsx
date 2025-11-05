@@ -12,7 +12,6 @@ import { Separator } from "@/components/ui/separator";
 import { Globe, Facebook } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { signInWithGooglePopup } from "@/firebase";
 
 export default function Auth() {
   const location = useLocation();
@@ -221,7 +220,8 @@ export default function Auth() {
     if (loading) return; // prevent double clicks
     setLoading(true);
     try {
-      const result = await signInWithGooglePopup();
+      const mod = await import("@/firebase");
+      const result = await mod.signInWithGooglePopup();
       if (!result) {
         // Popup was cancelled or blocked — don't show an error to the user
         setLoading(false);
